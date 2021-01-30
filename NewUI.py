@@ -1,15 +1,64 @@
-# Importing the libraries
-import PySimpleGUI as sg
-import validate
-import PopulateDatabase as pd
+# Importing all the required libraries
+import PySimpleGUI as sg  # For Graphical User Interface
+import validate  # Custom Library
+import PopulateDatabase as pd  # Custom Library
 
 
+# This is the User Interface for the Librarian Page
+def librarian_page():
+    # Each layout her is a tab in the librarian window
+    tab1_layout = [[sg.Text('Name of the book', grab=True), sg.Input(key='bookname',
+                                                                     tooltip='Enter the name of the book')],
+                   [sg.Text('Book Author', grab=True), sg.Input(key='author', tooltip='Enter the author of the book')],
+                   [sg.Text('Quantity', grab=True), sg.Input(key='qty',
+                                                             tooltip='Enter the number of books you want to buy')],
+                   [sg.Text('Price', grab=True), sg.Input(key='price', tooltip='Enter the price of the book')]]
+
+    tab2_layout = [[sg.Text('Name of the book', grab=True), sg.Input(key='bookname1', tooltip='Enter the book name')],
+                   [sg.Text('Author of the book', grab=True), sg.Input(key='author1',
+                                                                       tooltip="Enter the author of the book")],
+                   [sg.Text('No of books'), sg.Input(key='qty1', tooltip='Enter the number of books')]]
+
+    tab3_layout = [[sg.Text('Name of the book', grab=True), sg.Input(key='bookname2', tooltip='Enter the book name')],
+                   [sg.Text('Author of the book', grab=True), sg.Input(key='author2', tooltip='Enter the author')]]
+
+    tab4_layout = [[sg.Text('Name of the book', grab=True), sg.Input(key='bookname3', tooltip='Enter the book name')],
+                   [sg.Text('Author', grab=True), sg.Input(key='author3', tooltip='Enter the author')],
+                   [sg.Text('Number of books', grab=True), sg.Slider(range=(0, 40), orientation='h', key='qty3')]]
+
+    layout = [[sg.TabGroup([[sg.Tab('Add', tab1_layout, key='add'), sg.Tab('Delete', tab2_layout, key='delete'),
+                             sg.Tab('Modify', tab3_layout, key='modify'), sg.Tab('Lend', tab4_layout, key='lend')]])],
+              [sg.Button('Confirm', key='confirm'), sg.Button('Cancel', key='cancel')]]
+
+    window = sg.Window('WELCOME', layout)
+
+    # event loop for the librarian window
+    while True:
+        event, values = window.read()
+        # tab = window.Element('add').GetCurrent()
+        if event in (sg.WIN_CLOSED, 'cancel'):
+            break
+        elif event == 'confirm' and event == values['add']:
+            pd.populate_new_book(values['bookname'], values['author'], int(values['qty']), float(values['price']))
+        elif event == 'confirm' and event == values['delete']:
+            pd.delete_from_book(values['bookname1'], values['author1'])
+        elif event == 'confirm' and event == values['modify']:
+            pass
+        elif event == 'confirm' and event == values['lend']:
+            pd.lend_book(values['bookname3'], values['author3'], int(values['qty3']))
+
+    # Always close the window
+    window.close()
+
+
+# Main page that anyone sees when first opening the application
 def home_page():
     users = ['Librarian', 'Customer']
     sex = ['M', 'F', 'O']
 
     sg.theme('DarkBlue3')
 
+    # Defining each layout before defining the window and the loop for each column
     main_layout = [[sg.Text('WELCOME', justification='center', size=(80, 2), grab=True)],
                    [sg.Text('Nothing is pleasanter than exploring a library', justification='center', size=(80, 1),
                             grab=True, tooltip='True')],
@@ -93,8 +142,10 @@ def home_page():
                         break
                     elif lib_events == 'lconfirm':
                         if validate.check_librarian(lib_values['lname'], lib_values['lpass']):
-                            window['layout3'].update(visible=False)
-                            window['layout1'].update(visible=True)
+                            # window['layout3'].update(visible=False)
+                            # window['layout1'].update(visible=True)
+                            window.close()
+                            librarian_page()
                             break
                         else:
                             sg.Popup('Librarian not found')
@@ -165,6 +216,7 @@ def home_page():
                                         break
                                     else:
                                         sg.Popup('Password does not match')
+
         break
 
     window.close()
