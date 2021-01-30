@@ -32,8 +32,8 @@ def populate_books():
 def populate_customer():
     connection = sqlite3.connect("Library.db")
     c = connection.cursor()
-    c.execute("INSERT INTO Customer VALUES(1,'John',29,'M','New York','john10');")
-    c.execute("INSERT INTO Customer VALUES(2,'Jim',36,'M','Texas','jim10');")
+    c.execute("INSERT INTO Customer VALUES(1,'Gowtham',21,'M','Chennai','gowtham10');")
+    c.execute("INSERT INTO Customer VALUES(2,'Vaidehi',16,'F','Chennai','vaidehi10');")
     connection.commit()
     connection.close()
 
@@ -41,8 +41,8 @@ def populate_customer():
 def populate_librarian():
     connection = sqlite3.connect("Library.db")
     c = connection.cursor()
-    c.execute("INSERT INTO Librarian VALUES(100,'Claire',26,'F','London','claire10');")
-    c.execute("INSERT INTO Librarian VALUES(101,'Ben',44,'M','Paris','ben10');")
+    c.execute("INSERT INTO Librarian VALUES(100,'Vasudevan',56,'M','Chennai','vasudevan10');")
+    c.execute("INSERT INTO Librarian VALUES(101,'Gayathri',44,'F','Chennai','gayathri10');")
     connection.commit()
     connection.close()
 
@@ -60,9 +60,50 @@ def change_librarian_password(name, age, city, password):
 def populate_new_customer(name, age, sex, city, password):
     connection = sqlite3.connect("Library.db")
     c = connection.cursor()
-    c.execute("SELECT COUNT(*) FROM Customer;")
+    c.execute("SELECT COUNT(CId), Name FROM Customer;")
     variable = c.fetchall()
-    query = "INSERT INTO Customer VALUES();"
-    print(variable)
+    variable = variable[0][0] + 1
+    query = "INSERT INTO Customer VALUES({id}, '{n}', {a}, '{s}', '{c}', '{p}');"
+    query = query.format(id=variable, n=name, a=age, s=sex, c=city, p=password)
+    c.execute(query)
+    connection.commit()
+    connection.close()
+
+
+def populate_new_book(name, author, qty, price):
+    connection = sqlite3.connect("Library.db")
+    c = connection.cursor()
+    c.execute("SELECT COUNT(BId), BName FROM Book;")
+    variable = c.fetchall()
+    variable = variable[0][0] + 1
+    query = "INSERT INTO Book VALUES({id}, '{n}', '{a}', {q}, {p});"
+    query = query.format(id=variable, n=name, a=author, q=qty, p=price)
+    c.execute(query)
+    connection.commit()
+    connection.close()
+
+
+def delete_from_book(name, author):
+    connection = sqlite3.connect("Library.db")
+    c = connection.cursor()
+    query = "DELETE FROM Book WHERE BName = '{n}' AND Author = 'a';"
+    query = query.format(n=name, a=author)
+    c.execute(query)
+    connection.commit()
+    connection.close()
+
+
+def lend_book(name, author, qty):
+    connection = sqlite3.connect("Library.db")
+    c = connection.cursor()
+    query = "SELECT BName, Qty FROM Book WHERE BName = '{n}' AND Author = '{a}';"
+    query = query.format(n=name, a=author)
+    c.execute(query)
+    variable = c.fetchall()
+    variable = variable[0][1]
+    final_qty = variable - qty
+    query1 = "UPDATE Book SET Qty = {q} WHERE BName = '{n}' AND Author = '{a}';"
+    query1 = query1.format(q=final_qty, n=name, a=author)
+    c.execute(query1)
     connection.commit()
     connection.close()
