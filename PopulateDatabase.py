@@ -1,7 +1,9 @@
 # Importing the necessary libraries
 import sqlite3
+import random
 
 
+# Function to populate the books table with pre existing values if any
 def populate_books():
     connection = sqlite3.connect("Library.db")
     c = connection.cursor()
@@ -29,6 +31,7 @@ def populate_books():
     connection.close()
 
 
+# Function to populate the customer table with pre existing values if any
 def populate_customer():
     connection = sqlite3.connect("Library.db")
     c = connection.cursor()
@@ -38,6 +41,7 @@ def populate_customer():
     connection.close()
 
 
+# Function to populate the librarian table with pre existing values if any
 def populate_librarian():
     connection = sqlite3.connect("Library.db")
     c = connection.cursor()
@@ -47,6 +51,7 @@ def populate_librarian():
     connection.close()
 
 
+# Function to change the librarian password - Invoked from the librarian sign in page
 def change_librarian_password(name, age, city, password):
     connection = sqlite3.connect("Library.db")
     c = connection.cursor()
@@ -57,42 +62,46 @@ def change_librarian_password(name, age, city, password):
     connection.close()
 
 
+# Function to add a new customer to the database
 def populate_new_customer(name, age, sex, city, password):
     connection = sqlite3.connect("Library.db")
     c = connection.cursor()
-    c.execute("SELECT COUNT(CId), Name FROM Customer;")
-    variable = c.fetchall()
-    variable = variable[0][0] + 1
+    # c.execute("SELECT COUNT(CId), Name FROM Customer;")
+    # variable = c.fetchall()
+    # variable = variable[0][0] + 1
     query = "INSERT INTO Customer VALUES({id}, '{n}', {a}, '{s}', '{c}', '{p}');"
-    query = query.format(id=variable, n=name, a=age, s=sex, c=city, p=password)
+    query = query.format(id=random.randint(1, 30) + random.randint(1, 30), n=name, a=age, s=sex, c=city, p=password)
     c.execute(query)
     connection.commit()
     connection.close()
 
 
+# Function to add a new book to the database
 def populate_new_book(name, author, qty, price):
     connection = sqlite3.connect("Library.db")
     c = connection.cursor()
-    c.execute("SELECT COUNT(BId), BName FROM Book;")
-    variable = c.fetchall()
-    variable = variable[0][0] + 1
+    # c.execute("SELECT COUNT(BId), BName FROM Book;")
+    # variable = c.fetchall()
+    # variable = variable[0][0] + 1
     query = "INSERT INTO Book VALUES({id}, '{n}', '{a}', {q}, {p});"
-    query = query.format(id=variable, n=name, a=author, q=qty, p=price)
+    query = query.format(id=random.randint(1, 30) + random.randint(1, 30), n=name, a=author, q=qty, p=price)
     c.execute(query)
     connection.commit()
     connection.close()
 
 
-def delete_from_book(name, author):
+# Function to delete a book entirely from the database
+def delete_from_book(name):
     connection = sqlite3.connect("Library.db")
     c = connection.cursor()
-    query = "DELETE FROM Book WHERE BName = '{n}' AND Author = 'a';"
-    query = query.format(n=name, a=author)
+    query = "DELETE FROM Book WHERE BName = '{n}';"
+    query = query.format(n=name)
     c.execute(query)
     connection.commit()
     connection.close()
 
 
+# Function to lend book to a customer
 def lend_book(name, author, qty):
     connection = sqlite3.connect("Library.db")
     c = connection.cursor()
@@ -105,5 +114,17 @@ def lend_book(name, author, qty):
     query1 = "UPDATE Book SET Qty = {q} WHERE BName = '{n}' AND Author = '{a}';"
     query1 = query1.format(q=final_qty, n=name, a=author)
     c.execute(query1)
+    connection.commit()
+    connection.close()
+
+
+# Modifying book details
+def modify_book(name, author, qty, price, ename, eauthor):
+    connection = sqlite3.connect("Library.db")
+    c = connection.cursor()
+    query = """UPDATE Book SET BName = '{n}', Author = '{a}',
+            Qty = {q}, Price = {p} WHERE BName = '{bn}' AND Author = '{ba}';"""
+    query = query.format(n=name, a=author, q=qty, p=price, bn=ename, ba=eauthor)
+    c.execute(query)
     connection.commit()
     connection.close()
