@@ -6,46 +6,80 @@ import PopulateDatabase as pd  # Custom Library
 
 # This is the User Interface for the Librarian Page
 def librarian_page():
-    # Each layout her is a tab in the librarian window
+    # Each layout here is a tab in the librarian window
     tab1_layout = [[sg.Text('Name of the book', grab=True), sg.Input(key='bookname',
                                                                      tooltip='Enter the name of the book')],
                    [sg.Text('Book Author', grab=True), sg.Input(key='author', tooltip='Enter the author of the book')],
                    [sg.Text('Quantity', grab=True), sg.Input(key='qty',
                                                              tooltip='Enter the number of books you want to buy')],
-                   [sg.Text('Price', grab=True), sg.Input(key='price', tooltip='Enter the price of the book')]]
+                   [sg.Text('Price', grab=True), sg.Input(key='price', tooltip='Enter the price of the book')],
+                   [sg.Button('Add', key='add'), sg.Button('Cancel', key='cancel')]]
 
     tab2_layout = [[sg.Text('Name of the book', grab=True), sg.Input(key='bookname1', tooltip='Enter the book name')],
                    [sg.Text('Author of the book', grab=True), sg.Input(key='author1',
                                                                        tooltip="Enter the author of the book")],
-                   [sg.Text('No of books'), sg.Input(key='qty1', tooltip='Enter the number of books')]]
+                   [sg.Text('No of books'), sg.Input(key='qty1', tooltip='Enter the number of books')],
+                   [sg.Button('Delete', key='delete'), sg.Button('Cancel', key='cancel1')]]
 
     tab3_layout = [[sg.Text('Name of the book', grab=True), sg.Input(key='bookname2', tooltip='Enter the book name')],
-                   [sg.Text('Author of the book', grab=True), sg.Input(key='author2', tooltip='Enter the author')]]
+                   [sg.Text('Author of the book', grab=True), sg.Input(key='author2', tooltip='Enter the author')],
+                   [sg.Button('Modify', key='modify'), sg.Button('Cancel', key='cancel2')]]
 
     tab4_layout = [[sg.Text('Name of the book', grab=True), sg.Input(key='bookname3', tooltip='Enter the book name')],
                    [sg.Text('Author', grab=True), sg.Input(key='author3', tooltip='Enter the author')],
-                   [sg.Text('Number of books', grab=True), sg.Slider(range=(0, 40), orientation='h', key='qty3')]]
+                   [sg.Text('Number of books', grab=True), sg.Slider(range=(0, 40), orientation='h', key='qty3')],
+                   [sg.Button('Lend', key='lend'), sg.Button('Cancel', key='cancel3')]]
 
-    layout = [[sg.TabGroup([[sg.Tab('Add', tab1_layout, key='add'), sg.Tab('Delete', tab2_layout, key='delete'),
-                             sg.Tab('Modify', tab3_layout, key='modify'), sg.Tab('Lend', tab4_layout, key='lend')]])],
-              [sg.Button('Confirm', key='confirm'), sg.Button('Cancel', key='cancel')]]
+    layout = [[sg.TabGroup([[sg.Tab('Add', tab1_layout), sg.Tab('Delete', tab2_layout),
+                             sg.Tab('Modify', tab3_layout), sg.Tab('Lend', tab4_layout)]])]]
+
+    modify_layout = [[sg.Text('Name', grab=True), sg.Input(key='mname', tooltip='Modified Book Name')],
+                     [sg.Text('Author', grab=True), sg.Input(key='mauthor', tooltip='Modified Author')],
+                     [sg.Text('Quantity', grab=True), sg.Input(key='mqty', tooltip='Modified quantity')],
+                     [sg.Text('Price', grab=True), sg.Input(key='mprice', tooltip='Modified Price')],
+                     [sg.Button('Modify', key='m-modify'), sg.Button('Cancel', key='mcancel')]]
 
     window = sg.Window('WELCOME', layout)
 
     # event loop for the librarian window
     while True:
         event, values = window.read()
+        print(event, values)
         # tab = window.Element('add').GetCurrent()
-        if event in (sg.WIN_CLOSED, 'cancel'):
+        if event in (sg.WIN_CLOSED, 'cancel', 'cancel1', 'cancel2', 'cancel3'):
             break
-        elif event == 'confirm' and event == values['add']:
+
+        elif event == 'add':
             pd.populate_new_book(values['bookname'], values['author'], int(values['qty']), float(values['price']))
-        elif event == 'confirm' and event == values['delete']:
-            pd.delete_from_book(values['bookname1'], values['author1'])
-        elif event == 'confirm' and event == values['modify']:
-            pass
-        elif event == 'confirm' and event == values['lend']:
+            break
+
+        elif event == 'delete':
+            pd.delete_from_book(values['bookname1'])
+            break
+
+        elif event == 'modify':
+            if validate.book_exists(values['bookname2'], values['author2']):
+                window.close()
+                modification_window = sg.Window('Modify Details', modify_layout)
+
+                while True:
+                    m_event, m_values = modification_window.read()
+                    if m_event in (sg.WIN_CLOSED, 'mcancel'):
+                        break
+                    elif m_event == 'm-modify':
+                        pd.modify_book(m_values['mname'], m_values['mauthor'], m_values['mqty'], m_values['mprice'],
+                                       values['bookname2'], values['author2'])
+                        modification_window.close()
+                        break
+
+                modification_window.close()
+
+            else:
+                sg.Popup('Book does not exist')
+
+        elif event == 'lend':
             pd.lend_book(values['bookname3'], values['author3'], int(values['qty3']))
+            break
 
     # Always close the window
     window.close()
@@ -63,13 +97,13 @@ def home_page():
                    [sg.Text('Nothing is pleasanter than exploring a library', justification='center', size=(80, 1),
                             grab=True, tooltip='True')],
                    [sg.Text('Are you a Customer or a Librarian? ', grab=True, tooltip='Required')],
-                   [sg.R(text, 1, size=(18, 2), auto_size_text=True, tooltip=text, key=text) for text in users],
+                   [sg.R(text, 1, size=(18, 12), auto_size_text=True, tooltip=text, key=text) for text in users],
                    [sg.Button('Confirm', key='mconfirm'), sg.Button('Cancel', key='mcancel')]]
 
     customer_layout = [[sg.Frame('Customer Sign In', [[]])],
                        [sg.Text('Name', grab=True, tooltip='Type your name'), sg.Input(key='cname')],
                        [sg.Text('Password', grab=True, tooltip='test'), sg.Input(key='cpass', password_char='*')],
-                       [sg.Button('Sign In', key='cconfirm'), sg.Button('Exit', key='cexit')],
+                       [sg.Button('Sign In', key='cconfirm', bind_return_key=True), sg.Button('Exit', key='cexit')],
                        [sg.Text("Don't have an account?"), sg.Button('Sign Up', enable_events=True, key='clink')],
                        [sg.Button('Forgot Password', key='cfpass')]]
 
@@ -109,10 +143,9 @@ def home_page():
     change_librarian_password_layout = [[sg.Text('New Password', grab=True), sg.Input(key='cppass',
                                                                                       tooltip='Enter your password',
                                                                                       password_char='*')],
-                                        [sg.Text('Confirm Password', grab=True), sg.Input(key='cppass1', password_char=
-                                                                                          '*',
-                                                                                          tooltip=
-                                                                                          'Enter your password again')],
+                                        [sg.Text('Confirm Password', grab=True), sg.Input(key='cppass1',
+                                                                                          password_char='*',
+                                                                                          tooltip='Confirm password')],
                                         [sg.Button('Confirm', key='cpconfirm'), sg.Button('Cancel', key='cpcancel')]]
 
     # librarian_function_layout = [[]]
