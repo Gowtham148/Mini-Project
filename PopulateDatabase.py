@@ -35,8 +35,8 @@ def populate_books():
 def populate_customer():
     connection = sqlite3.connect("Library.db")
     c = connection.cursor()
-    c.execute("INSERT INTO Customer VALUES(1,'Gowtham',21,'M','Chennai','gowtham10');")
-    c.execute("INSERT INTO Customer VALUES(2,'Vaidehi',16,'F','Chennai','vaidehi10');")
+    c.execute("INSERT INTO Customer VALUES(1,'John',21,'M','NY','John10');")
+    c.execute("INSERT INTO Customer VALUES(2,'Jay',16,'F','Florida','Jay10');")
     connection.commit()
     connection.close()
 
@@ -45,8 +45,8 @@ def populate_customer():
 def populate_librarian():
     connection = sqlite3.connect("Library.db")
     c = connection.cursor()
-    c.execute("INSERT INTO Librarian VALUES(100,'Vasudevan',56,'M','Chennai','vasudevan10');")
-    c.execute("INSERT INTO Librarian VALUES(101,'Gayathri',44,'F','Chennai','gayathri10');")
+    c.execute("INSERT INTO Librarian VALUES(100,'Jess',56,'M','NY','jess10');")
+    c.execute("INSERT INTO Librarian VALUES(101,'Jim',44,'F','Chennai','jim10');")
     connection.commit()
     connection.close()
 
